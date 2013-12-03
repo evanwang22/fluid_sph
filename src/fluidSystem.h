@@ -14,9 +14,10 @@ public:
 	
 	vector<Vector3f> evalF(vector<Vector3f> state);
     
+    Vector3f checkBounds(Vector3f position);
+    
 	void draw();
 
-    map<int, vector<Spring>> spring_map;
 	
     static constexpr float mass = 1;
     static constexpr float g = -2;

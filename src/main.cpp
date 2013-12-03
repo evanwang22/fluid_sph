@@ -11,6 +11,7 @@
 #include "simpleSystem.h"
 #include "ClothSystem.h"
 #include "pendulumSystem.h"
+#include "fluidSystem.h"
 
 using namespace std;
 
@@ -27,7 +28,7 @@ namespace
   {
     // seed the random number generator with the current time
     srand( time( NULL ) );
-    system = new ClothSystem(8,8);
+    system = new FluidSystem(100);
     timeStepper = new RungeKutta();
     h = 0.04f;
 
