@@ -77,15 +77,20 @@ vector<Vector3f> FluidSystem::evalF(vector<Vector3f> state)
 
             Vector3f p1_pos = state.at(i);
             m_dCurrent.push_back(calcMassDensity(p1_pos, &state));
+        }
+    }
+    this->setMD(m_dCurrent);
 
-            Vector3f gravity_f = Vector3f(0,mass*g,0);
+    for (int i = 0; i < state.size(); i++) {
+        if (i%2 == 0) {
+            Vector3f gravity_f = Vector3f(0,m_dState.at(i/2)*g,0);
+            Vector3f buoyancy_f = Vector3f(0, buoyancy*(m_dState.at(i/2)- rest_density)*g, 0);
             Vector3f accel = (gravity_f)/mass;
 
             f.push_back(state.at(i+1));
             f.push_back(accel);
         }
     }
-    this->setMD(m_dCurrent);
     
     // We need to have a bounding box so put a min and max
     // on the position vectors for the particles
