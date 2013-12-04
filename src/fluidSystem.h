@@ -25,6 +25,7 @@ public:
     static constexpr float drag_k = 0.5;
     // spring constant
     static constexpr float spring_k = 20;
+    static constexpr float smoothing_width = 50.0f;
 };
 
 #endif
