@@ -71,6 +71,39 @@ float calculateKernelPressureGradient ( float r, float h) {
 	return base*smoothing;
 }
 
+float calculateLaplacianKernelViscosity( float r, float h) {
+    float base = (15.0f)/ (2.0*PI*pow(h,3));
+    float smoothing;
+	if ( 0.0f <= abs(r) <= h) {
+        float term1 = pow(abs(r),3)/(2.0f*pow(h,3));
+        float term2 = pow(abs(r),2)/pow(h,2);
+        float term3 = h/ (2.0f* abs(r));
+		smoothing = -term1+term2+term3-1.0f;
+	}	
+	else if ( abs(r) > h) {
+		smoothing = 0.0f;
+	}
+	else {
+		cerr << "SOMETHING BAD IS HAPPENING WITH THE <<PRESSURE GRADIENT>> KERNEL" << endl;
+	}
+		
+	return base*smoothing;
+}
+
+float FluidSystem::calculateViscosity(Vector3f pos1, Vector3f pos2, Vector3f velocity1, Vector3f velocity2, float p1_md) {
+    //mu = viscosity coefficient, depends on material properties
+    //currently in pascal seconds
+    float mu = pow(8.9f, -4); 
+    
+    float v_diff = (velocity2-velocity1).abs();
+    float distance = (pos1-pos2).abs();
+    float viscosity_kernel = calculateLaplacianKernelViscosity(distance, smoothing_width);
+    
+    float viscosity = (mu/p1_md)*v_diff*mass*viscosity_kernel;
+    
+    return viscosity;
+}
+
 //not the full pressure gradient, does not take sum, do that in evalF
 float FluidSystem::calculatePressureGradient(float p1_md, float p2_md, Vector3f pos1, Vector3f pos2) {
 	float pressure_gradient;
@@ -85,18 +118,22 @@ float FluidSystem::calculatePressureGradient(float p1_md, float p2_md, Vector3f 
     
     float avg_pressure = (p1_pressure + p2_pressure)/(2.0f);
     float vol = mass/p2_pressure;
+    if (pos1 == pos2) {
+        return 0.0f;
+    }
+
     return avg_pressure*vol*gradient_kernel;
     
 }
 
-float calculateKernalLaplacian(float r, float h) {
+Vector3f calculateKernalLaplacian(float r, float h, Vector3f r_vec) {
 
     float base = -945.0f/(32*PI*pow(h,9));
-    float smoothing;
+    Vector3f smoothing;
     if (0.0f <= abs(r) <= h) {
-        smoothing = r * pow((pow(h, 2)-pow(r, 2)), 2);
+        smoothing = r_vec * pow((pow(h, 2)-pow(r, 2)), 2);
     } else {
-        smoothing = 0.0f;
+        smoothing = Vector3f(0,0,0);
     }
 
     return base*smoothing;
@@ -126,12 +163,12 @@ float FluidSystem::calcColorfield(int p1_index, vector<Vector3f>* state) {
     return colorfield;
 }
 
-float FluidSystem::calcNormal(int p1_index, vector<Vector3f>* state) {
-    float normal;
+Vector3f FluidSystem::calcNormal(int p1_index, vector<Vector3f>* state) {
+    Vector3f normal = Vector3f(0,0,0);
     for (int j = 0; j < state->size(); j++) {
         if (j%2 == 0) {
-            float distance = (state->at(p1_index)-state->at(j)).abs();
-            normal += 1.0/m_dState.at(j/2) * calculateKernalLaplacian(distance, smoothing_width);
+            Vector3f distance = state->at(p1_index)-state->at(j);
+            normal += 1.0/m_dState.at(j/2) * calculateKernalLaplacian(distance.abs(), smoothing_width, distance);
         }
     }
     return normal;
@@ -157,11 +194,34 @@ vector<Vector3f> FluidSystem::evalF(vector<Vector3f> state)
         if (i%2 == 0) {
             Vector3f gravity_f = Vector3f(0,m_dState.at(i/2)*g,0);
             Vector3f buoyancy_f = Vector3f(0, buoyancy*(m_dState.at(i/2)- rest_density)*g, 0);
-            Vector3f accel = (gravity_f)/mass;
+            
+            Vector3f surface_tension = -1.5f*calcColorfield(i, &state)*calcNormal(i, &state)/calcNormal(i, &state).abs();
 
+
+            float pressure_gradient;
+            float viscosity;
+
+            for (int j=0; j<state.size(); j++) {
+                if (j%2 == 0) {
+                    float p1_md = m_dState.at(i/2);
+                    float p2_md = m_dState.at(j/2);
+                            
+                    pressure_gradient -= calculatePressureGradient(p1_md, p2_md, state.at(i), state.at(j));
+                    viscosity += calculateViscosity(state.at(i), state.at(j), state.at(i+1), state.at(j+1), p1_md);
+                    
+                } 
+            }
+
+
+        
+        
+            
+            Vector3f accel = (gravity_f)/m_dState.at(i/2);
             f.push_back(state.at(i+1));
             f.push_back(accel);
         }
+    
+
     }
     
     // We need to have a bounding box so put a min and max
