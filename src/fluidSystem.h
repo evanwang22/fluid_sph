@@ -25,7 +25,13 @@ public:
     static constexpr float drag_k = 0.5;
     // spring constant
     static constexpr float spring_k = 20;
+
+    //change smoothing width as necessary, the larger the more accurate
     static constexpr float smoothing_width = 50.0f;
+
+    // rest density corresponds to starting density of particles, depends on material properties
+    // static constexpr float rest_density = 1.0f;
+
 };
 
 #endif
