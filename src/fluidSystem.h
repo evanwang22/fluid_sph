@@ -42,6 +42,10 @@ public:
 protected:
     vector<float> m_dState;
 
+    // rest density corresponds to starting density of particles, depends on material properties
+    static constexpr float rest_density = 1.0f;
+
+    static constexpr float buoyancy = 0.5f;
 
 };
 
