@@ -24,7 +24,7 @@ FluidSystem::FluidSystem(int numParticles): ParticleSystem(numParticles)
 // using gaussian kernel
 // h = smoothing width
 // r = distance between two particles
-float calculate_kernel(float r, float h) {
+float calculateKernel(float r, float h) {
 
 	float base = 315.0f/ (64*PI*pow(h,9));
 	float smoothing;
@@ -35,7 +35,7 @@ float calculate_kernel(float r, float h) {
 		smoothing = 0.0f;
 	}
 	else {
-		cerr << "SOMETHING BAD IS HAPPENING WITH THE KERNEL" << endl;
+		cerr << "SOMETHING BAD IS HAPPENING WITH THE <<MASS DENSITY>> KERNEL" << endl;
 	}
 		
 	return base*smoothing;
@@ -49,21 +49,45 @@ float FluidSystem::calcMassDensity(Vector3f p1_pos, vector<Vector3f>* state) {
             Vector3f p2_pos = state->at(j);
             float distance = (p1_pos - p2_pos).abs();
             //mass density of particle j on particle i
-            float md_i = mass * calculate_kernel(distance, smoothing_width);
+            float md_i = mass * calculateKernel(distance, smoothing_width);
             mass_density += md_i;
         }
     }
     return mass_density;
 }
-float calculate_kernel_gradient ( float r, float h) {
+
+float calculateKernelPressureGradient ( float r, float h) {
     float base = (-45.0f * r)/ (PI*pow(h,6)*abs(r));
-	float smoothing = pow(h-abs(r),2);
+    float smoothing;
+	if ( 0.0f <= abs(r) <= h) {
+		smoothing = pow(h-abs(r),2);
+	}	
+	else if ( abs(r) > h) {
+		smoothing = 0.0f;
+	}
+	else {
+		cerr << "SOMETHING BAD IS HAPPENING WITH THE <<PRESSURE GRADIENT>> KERNEL" << endl;
+	}
 		
 	return base*smoothing;
 }
 
-float calculatePressureGradient() {
+//not the full pressure gradient, does not take sum, do that in evalF
+float FluidSystem::calculatePressureGradient(float p1_md, float p2_md, Vector3f pos1, Vector3f pos2) {
+	float pressure_gradient;
+    //boltzmann's constant
+	float k_b = pow(1.38, -23);
+    float p1_pressure = k_b*(p1_md - rest_density);
+    float p2_pressure = k_b*(p2_md - rest_density);
 
+    float distance = (pos1-pos2).abs();
+    
+    float gradient_kernel = calculateKernelPressureGradient(distance, smoothing_width);
+    
+    float avg_pressure = (p1_pressure + p2_pressure)/(2.0f);
+    float vol = mass/p2_pressure;
+    return avg_pressure*vol*gradient_kernel;
+    
 }
 
 // for a given state, evaluate f(X,t)
