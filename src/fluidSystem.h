@@ -4,7 +4,7 @@
 #include "extra.h"
 #include <vector>
 #include <map>
-
+#include <math.h>
 #include "particleSystem.h"
 
 class FluidSystem: public ParticleSystem
@@ -17,6 +17,7 @@ public:
     Vector3f checkBounds(Vector3f position);
     
     float calcMassDensity(Vector3f p1_pos, vector<Vector3f>* state);
+    float calculatePressureGradient(float p1_md, float p2_md, Vector3f pos1, Vector3f pos2); 
 
 	void draw();
 	void setMD(const vector<float>  & newState) { m_dState = newState; };
@@ -28,16 +29,16 @@ public:
     // spring constant
     static constexpr float spring_k = 20;
 
+    //change smoothing width as necessary, the larger the more accurate
+    static constexpr float smoothing_width = 50.0f;
 
+    // rest_density = starting density of particles, depends on material properties
+    static constexpr float rest_density = 1.0f;
    
 
 protected:
     vector<float> m_dState;
-    //change smoothing width as necessary, the larger the more accurate
-    static constexpr float smoothing_width = 50.0f;
 
-    // rest density corresponds to starting density of particles, depends on material properties
-    // static constexpr float rest_density = 1.0f;
 
 };
 
