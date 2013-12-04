@@ -17,8 +17,8 @@ public:
     Vector3f checkBounds(Vector3f position);
     
     float calcMassDensity(Vector3f p1_pos, vector<Vector3f>* state);
-    float calculatePressureGradient(float p1_md, float p2_md, Vector3f pos1, Vector3f pos2);
-    float calculateViscosity(Vector3f pos1, Vector3f pos2, Vector3f velocity1, Vector3f velocity2, float p1_md);
+    Vector3f calculatePressureGradient(float p1_md, float p2_md, Vector3f pos1, Vector3f pos2);
+    Vector3f calculateViscosity(Vector3f pos1, Vector3f pos2, Vector3f velocity1, Vector3f velocity2, float p1_md);
 
 	void draw();
 	void setMD(const vector<float>  & newState) { m_dState = newState; };

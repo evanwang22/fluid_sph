@@ -56,13 +56,13 @@ float FluidSystem::calcMassDensity(Vector3f p1_pos, vector<Vector3f>* state) {
     return mass_density;
 }
 
-float calculateKernelPressureGradient ( float r, float h) {
-    float base = (-45.0f * r)/ (PI*pow(h,6)*abs(r));
+Vector3f calculateKernelPressureGradient ( Vector3f r, float h) {
+    Vector3f base = (-45.0f * r)/ (PI*pow(h,6)*r.abs());
     float smoothing;
-	if ( 0.0f <= abs(r) <= h) {
-		smoothing = pow(h-abs(r),2);
+	if ( 0.0f <= r.abs() <= h) {
+		smoothing = pow(h-r.abs(),2);
 	}	
-	else if ( abs(r) > h) {
+	else if ( r.abs() > h) {
 		smoothing = 0.0f;
 	}
 	else {
@@ -72,16 +72,13 @@ float calculateKernelPressureGradient ( float r, float h) {
 	return base*smoothing;
 }
 
-float calculateLaplacianKernelViscosity( float r, float h) {
-    float base = (15.0f)/ (2.0*PI*pow(h,3));
+float calculateLaplacianKernelViscosity( Vector3f r, float h) {
+    float base = (45.0f)/ (PI*pow(h,6));
     float smoothing;
-	if ( 0.0f <= abs(r) <= h) {
-        float term1 = pow(abs(r),3)/(2.0f*pow(h,3));
-        float term2 = pow(abs(r),2)/pow(h,2);
-        float term3 = h/ (2.0f* abs(r));
-		smoothing = -term1+term2+term3-1.0f;
+	if ( 0.0f <= r.abs() <= h) {
+        smoothing = h- r.abs();
 	}	
-	else if ( abs(r) > h) {
+	else if ( r.abs() > h) {
 		smoothing = 0.0f;
 	}
 	else {
@@ -91,31 +88,31 @@ float calculateLaplacianKernelViscosity( float r, float h) {
 	return base*smoothing;
 }
 
-float FluidSystem::calculateViscosity(Vector3f pos1, Vector3f pos2, Vector3f velocity1, Vector3f velocity2, float p1_md) {
+Vector3f FluidSystem::calculateViscosity(Vector3f pos1, Vector3f pos2, Vector3f velocity1, Vector3f velocity2, float p1_md) {
     //mu = viscosity coefficient, depends on material properties
     //currently in pascal seconds
     float mu = pow(8.9f, -4); 
     
-    float v_diff = (velocity2-velocity1).abs();
-    float distance = (pos1-pos2).abs();
+    Vector3f v_diff = velocity2-velocity1;
+    Vector3f distance = pos1-pos2;
     float viscosity_kernel = calculateLaplacianKernelViscosity(distance, smoothing_width);
     
-    float viscosity = (mu/p1_md)*v_diff*mass*viscosity_kernel;
+    Vector3f viscosity = (mu/p1_md)*v_diff*mass*viscosity_kernel;
     
     return viscosity;
 }
 
 //not the full pressure gradient, does not take sum, do that in evalF
-float FluidSystem::calculatePressureGradient(float p1_md, float p2_md, Vector3f pos1, Vector3f pos2) {
+Vector3f FluidSystem::calculatePressureGradient(float p1_md, float p2_md, Vector3f pos1, Vector3f pos2) {
 	float pressure_gradient;
     //boltzmann's constant
 	float k_b = pow(1.38, -23);
     float p1_pressure = k_b*(p1_md - rest_density);
     float p2_pressure = k_b*(p2_md - rest_density);
 
-    float distance = (pos1-pos2).abs();
+    Vector3f distance = pos1-pos2;
     
-    float gradient_kernel = calculateKernelPressureGradient(distance, smoothing_width);
+    Vector3f gradient_kernel = calculateKernelPressureGradient(distance, smoothing_width);
     
     float avg_pressure = (p1_pressure + p2_pressure)/(2.0f);
     float vol = mass/p2_pressure;
@@ -148,8 +145,8 @@ vector<Vector3f> FluidSystem::evalF(vector<Vector3f> state)
             Vector3f buoyancy_f = Vector3f(0, buoyancy*(m_dState.at(i/2)- rest_density)*g, 0);
             
 
-            float pressure_gradient;
-            float viscosity;
+            Vector3f pressure_gradient;
+            Vector3f viscosity;
 
             for (int j=0; j<state.size(); j++) {
                 if (j%2 == 0) {
