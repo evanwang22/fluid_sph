@@ -72,6 +72,34 @@ float calculateKernelPressureGradient ( float r, float h) {
 	return base*smoothing;
 }
 
+float calculateLaplacianKernelViscosity( float r, float h) {
+    float base = (15.0f)/ (2.0*PI*pow(h,3));
+    float smoothing;
+	if ( 0.0f <= abs(r) <= h) {
+        float term1 = pow(abs(r),3)/(2.0f*pow(h,3));
+        float term2 = pow(abs(r),2)/pow(h,2);
+        float term3 = h/ (2.0f* abs(r));
+		smoothing = -term1+term2+term3-1.0f;
+	}	
+	else if ( abs(r) > h) {
+		smoothing = 0.0f;
+	}
+	else {
+		cerr << "SOMETHING BAD IS HAPPENING WITH THE <<PRESSURE GRADIENT>> KERNEL" << endl;
+	}
+		
+	return base*smoothing;
+}
+
+float FluidSystem::calculateViscosity(Vector3f pos1, Vector3f pos2) {
+    //mu = viscosity coefficient, depends on material properties
+    //currently in pascal seconds
+    float mu = pow(8.9f, -4); 
+    
+    
+
+}
+
 //not the full pressure gradient, does not take sum, do that in evalF
 float FluidSystem::calculatePressureGradient(float p1_md, float p2_md, Vector3f pos1, Vector3f pos2) {
 	float pressure_gradient;
@@ -86,6 +114,10 @@ float FluidSystem::calculatePressureGradient(float p1_md, float p2_md, Vector3f 
     
     float avg_pressure = (p1_pressure + p2_pressure)/(2.0f);
     float vol = mass/p2_pressure;
+    if (pos1 == pos2) {
+        return 0.0f;
+    }
+
     return avg_pressure*vol*gradient_kernel;
     
 }
