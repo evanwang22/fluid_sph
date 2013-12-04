@@ -37,7 +37,9 @@ protected:
     static constexpr float smoothing_width = 50.0f;
 
     // rest density corresponds to starting density of particles, depends on material properties
-    // static constexpr float rest_density = 1.0f;
+    static constexpr float rest_density = 1.0f;
+
+    static constexpr float buoyancy = 0.5f;
 
 };
 
