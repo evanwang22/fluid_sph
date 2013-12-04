@@ -24,16 +24,28 @@ FluidSystem::FluidSystem(int numParticles): ParticleSystem(numParticles)
 //using guassian kernel
 //h = smoothing width
 //r = distance between two particles
-float get_kernal(float h, float r) {
-	float base = 1.0f/ ((pow(PI, 1.5f))*(pow(h,3)));
-	float exp = (r*r)/(h*h);
-	return pow(base, exp);
+float get_kernal(float r, float h) {
+
+	float base = 315.0f/ (64*PI*pow(h,9);
+	float smoothing;
+	if ( 0.0f <= abs(r) <= h) {
+		smoothing = pow( (h*h)-(r*r), 3);
+	}	
+	else if ( abs(r) > h) {
+		smoothing = 0.0f;
+	}
+	else {
+		cerr << "SOMETHING BAD IS HAPPENING WITH THE KERNEL" << endl;
+	}
+		
+	return base*smoothing;
 }
 
 // for a given state, evaluate f(X,t)
 vector<Vector3f> FluidSystem::evalF(vector<Vector3f> state)
 {
 	vector<Vector3f> f;
+	float mass_density = 0;
 
     for (int i = 0; i < state.size(); i++) {
         if (i%2 == 0) {
