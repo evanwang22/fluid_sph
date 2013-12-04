@@ -1,6 +1,10 @@
 #include "fluidSystem.h"
 #include <math.h>
 
+#ifndef PI
+#define PI 3.14159265359
+#endif
+
 FluidSystem::FluidSystem(int numParticles): ParticleSystem(numParticles)
 {
     m_numParticles = numParticles;
@@ -15,6 +19,15 @@ FluidSystem::FluidSystem(int numParticles): ParticleSystem(numParticles)
         }
 	}
 
+}
+
+//using guassian kernel
+//h = smoothing width
+//r = distance between two particles
+float get_kernal(float h, float r) {
+	float base = 1.0f/ ((pow(PI, 1.5f))*(pow(h,3)));
+	float exp = (r*r)/(h*h);
+	return pow(base, exp);
 }
 
 // for a given state, evaluate f(X,t)
