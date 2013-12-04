@@ -91,13 +91,18 @@ float calculateLaplacianKernelViscosity( float r, float h) {
 	return base*smoothing;
 }
 
-float FluidSystem::calculateViscosity(Vector3f pos1, Vector3f pos2) {
+float FluidSystem::calculateViscosity(Vector3f pos1, Vector3f pos2, Vector3f velocity1, Vector3f velocity2, float p1_md) {
     //mu = viscosity coefficient, depends on material properties
     //currently in pascal seconds
     float mu = pow(8.9f, -4); 
     
+    float v_diff = (velocity2-velocity1).abs();
+    float distance = (pos1-pos2).abs();
+    float viscosity_kernel = calculateLaplacianKernelViscosity(distance, smoothing_width);
     
-
+    float viscosity = (mu/p1_md)*v_diff*mass*viscosity_kernel;
+    
+    return viscosity;
 }
 
 //not the full pressure gradient, does not take sum, do that in evalF
@@ -141,11 +146,32 @@ vector<Vector3f> FluidSystem::evalF(vector<Vector3f> state)
         if (i%2 == 0) {
             Vector3f gravity_f = Vector3f(0,m_dState.at(i/2)*g,0);
             Vector3f buoyancy_f = Vector3f(0, buoyancy*(m_dState.at(i/2)- rest_density)*g, 0);
-            Vector3f accel = (gravity_f)/mass;
+            
 
+            float pressure_gradient;
+            float viscosity;
+
+            for (int j=0; j<state.size(); j++) {
+                if (j%2 == 0) {
+                    float p1_md = m_dState.at(i/2);
+                    float p2_md = m_dState.at(j/2);
+                            
+                    pressure_gradient -= calculatePressureGradient(p1_md, p2_md, state.at(i), state.at(j));
+                    viscosity += calculateViscosity(state.at(i), state.at(j), state.at(i+1), state.at(j+1), p1_md);
+        
+                } 
+            }
+
+
+        
+        
+            
+            Vector3f accel = (gravity_f)/mass;
             f.push_back(state.at(i+1));
             f.push_back(accel);
         }
+    
+
     }
     
     // We need to have a bounding box so put a min and max
