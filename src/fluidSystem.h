@@ -19,8 +19,8 @@ public:
     float calcMassDensity(Vector3f p1_pos, vector<Vector3f>* state);
 
 	void draw();
+	void setMD(const vector<float>  & newState) { m_dState = newState; };
 
-	
     static constexpr float mass = 1;
     static constexpr float g = -2;
     // drag constant
@@ -30,6 +30,7 @@ public:
 
 protected:
     vector<float> m_dState;
+    static constexpr float smoothing_width = 50.0f;
 };
 
 #endif

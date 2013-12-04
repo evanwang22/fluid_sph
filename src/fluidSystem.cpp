@@ -21,7 +21,6 @@ FluidSystem::FluidSystem(int numParticles): ParticleSystem(numParticles)
 	}
 
 }
-
 // using gaussian kernel
 // h = smoothing width
 // r = distance between two particles
@@ -56,17 +55,24 @@ float FluidSystem::calcMassDensity(Vector3f p1_pos, vector<Vector3f>* state) {
     }
     return mass_density;
 }
+float calculate_kernel_gradient ( float r, float h) {
+    float base = (-45.0f * r)/ (PI*pow(h,6)*abs(r));
+	float smoothing = pow(h-abs(r),2);
+		
+	return base*smoothing;
+}
 
 // for a given state, evaluate f(X,t)
 vector<Vector3f> FluidSystem::evalF(vector<Vector3f> state)
 {
 	vector<Vector3f> f;
+    vector<float> m_dCurrent;
 
     for (int i = 0; i < state.size(); i++) {
         if (i%2 == 0) {
 
             Vector3f p1_pos = state.at(i);
-            m_dState.at(i) = calcMassDensity(p1_pos, &state);
+            m_dCurrent.push_back(calcMassDensity(p1_pos, &state));
 
             Vector3f gravity_f = Vector3f(0,mass*g,0);
             Vector3f accel = (gravity_f)/mass;
@@ -75,6 +81,7 @@ vector<Vector3f> FluidSystem::evalF(vector<Vector3f> state)
             f.push_back(accel);
         }
     }
+    this->setMD(m_dCurrent);
     
     // We need to have a bounding box so put a min and max
     // on the position vectors for the particles
