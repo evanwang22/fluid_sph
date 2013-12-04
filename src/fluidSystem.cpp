@@ -22,7 +22,7 @@ FluidSystem::FluidSystem(int numParticles): ParticleSystem(numParticles)
 
 }
 
-//using guassian kernel
+
 //h = smoothing width
 //r = distance between two particles
 float calculate_kernel(float r, float h) {
@@ -38,6 +38,16 @@ float calculate_kernel(float r, float h) {
 	else {
 		cerr << "SOMETHING BAD IS HAPPENING WITH THE KERNEL" << endl;
 	}
+		
+	return base*smoothing;
+}
+
+
+//h = smoothing distance
+//r = distance between two particles
+float calculate_kernel_gradient ( float r, float h) {
+    float base = (-45.0f * r)/ (PI*pow(h,6)*abs(r));
+	float smoothing = pow(h-abs(r),2);
 		
 	return base*smoothing;
 }
