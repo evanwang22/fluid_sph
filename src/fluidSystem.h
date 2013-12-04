@@ -33,7 +33,7 @@ public:
     static constexpr float spring_k = 20;
 
     //change smoothing width as necessary, the larger the more accurate
-    static constexpr float smoothing_width = 25.0f;
+    static constexpr float smoothing_width = 6.0f;
 
     vector<float> m_dState;
 
@@ -41,9 +41,9 @@ protected:
 
     // rest density corresponds to starting density of particles, depends on material properties
     // units kg/m^3
-    static constexpr float rest_density = 1000.0f;;
+    static constexpr float rest_density = 10.0f;;
 
-    static constexpr float buoyancy = 0.5f;
+    static constexpr float buoyancy = 0.12f;
 
 };
 

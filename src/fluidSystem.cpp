@@ -12,8 +12,8 @@ FluidSystem::FluidSystem(int numParticles): ParticleSystem(numParticles)
 
     // initialize all these particles together somehow ??
     
-    for (int i = 0; i < 20; i++) {
-	    for (int j = 0; j < 20; j++) {	
+    for (int i = 0; i < 25; i++) {
+	    for (int j = 0; j < 25; j++) {	
 		// for this system, we care about the position and the velocity
             m_vVecState.push_back(Vector3f(0.125*j,0,0.125*i));
             m_vVecState.push_back(Vector3f(0,0,0));
@@ -191,9 +191,8 @@ vector<Vector3f> FluidSystem::evalF(vector<Vector3f> state)
         if (i%2 == 0) {
             Vector3f gravity_f = Vector3f(0,m_dState.at(i/2)*g,0);
             Vector3f buoyancy_f = Vector3f(0, buoyancy*(m_dState.at(i/2)- rest_density)*g, 0);
-            
-            Vector3f surface_tension = -1.5f*calcColorfield(i, &state)*calcNormal(i, &state)/calcNormal(i, &state).abs();
 
+            Vector3f surface_tension = -1.5f*calcColorfield(i, &state)*calcNormal(i, &state)/calcNormal(i, &state).abs();
 
             Vector3f pressure_gradient;
             Vector3f viscosity;
@@ -202,28 +201,19 @@ vector<Vector3f> FluidSystem::evalF(vector<Vector3f> state)
                 if (j%2 == 0) {
                     float p1_md = m_dState.at(i/2);
                     float p2_md = m_dState.at(j/2);
-                            
                     pressure_gradient -= calculatePressureGradient(p1_md, p2_md, state.at(i), state.at(j));
                     viscosity += calculateViscosity(state.at(i), state.at(j), state.at(i+1), state.at(j+1), p1_md);
-                    
                 } 
             }
 
-
-        
-        
-            
-            Vector3f accel = (gravity_f)/m_dState.at(i/2);
+            Vector3f accel = (gravity_f+buoyancy_f+surface_tension+pressure_gradient+viscosity)/m_dState.at(i/2);
             f.push_back(state.at(i+1));
             f.push_back(accel);
         }
-    
-
     }
-    
     // We need to have a bounding box so put a min and max
     // on the position vectors for the particles
-    
+
     for (int i = 0; i < state.size(); i++) {
         if (i%2 == 0) {
             if (state.at(i).y() < -2.0f) {

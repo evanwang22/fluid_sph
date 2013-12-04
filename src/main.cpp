@@ -28,8 +28,8 @@ namespace
   {
     // seed the random number generator with the current time
     srand( time( NULL ) );
-    system = new FluidSystem(100);
-    timeStepper = new RungeKutta();
+    system = new FluidSystem(225);
+    timeStepper = new ForwardEuler();
     h = 0.04f;
 
     if (argc > 1) {
@@ -108,7 +108,7 @@ namespace
         }
 
         case 49: //1
-            system = new SimpleSystem();
+            system = new FluidSystem(625);
             cout << "Simple System selected\n";
             break;
         case 50: //2
