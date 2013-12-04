@@ -16,10 +16,9 @@ FluidSystem::FluidSystem(int numParticles): ParticleSystem(numParticles)
 	    for (int j = 0; j < 20; j++) {	
 		// for this system, we care about the position and the velocity
             m_vVecState.push_back(Vector3f(0.125*j,0,0.125*i));
-            m_vVecState.push_back(Vector3f(0.1*j,0,0.25*pow(-1,i)));
+            m_vVecState.push_back(Vector3f(0,0,0));
         }
 	}
-
 }
 // using gaussian kernel
 // h = smoothing width
@@ -90,6 +89,55 @@ float FluidSystem::calculatePressureGradient(float p1_md, float p2_md, Vector3f 
     
 }
 
+float calculateKernalLaplacian(float r, float h) {
+
+    float base = -945.0f/(32*PI*pow(h,9));
+    float smoothing;
+    if (0.0f <= abs(r) <= h) {
+        smoothing = r * pow((pow(h, 2)-pow(r, 2)), 2);
+    } else {
+        smoothing = 0.0f;
+    }
+
+    return base*smoothing;
+}
+
+float calculateKernalLaplacian2nd(float r, float h) {
+
+    float base = -945.0f/(32*PI*pow(h,9));
+    float smoothing;
+    if (0.0f <= abs(r) <= h) {
+        smoothing = (pow(h, 2)-pow(r, 2))*(3*pow(h,2)-7*pow(r, 2));
+    } else {
+        smoothing = 0.0f;
+    }
+
+    return base*smoothing;
+}
+
+float FluidSystem::calcColorfield(int p1_index, vector<Vector3f>* state) {
+    float colorfield;
+    for (int j = 0; j < state->size(); j++) {
+        if (j%2 == 0) {
+            float distance = (state->at(p1_index)-state->at(j)).abs();
+            colorfield += 1.0/m_dState.at(j/2) * calculateKernalLaplacian2nd(distance, smoothing_width);
+        }
+    }
+    return colorfield;
+}
+
+float FluidSystem::calcNormal(int p1_index, vector<Vector3f>* state) {
+    float normal;
+    for (int j = 0; j < state->size(); j++) {
+        if (j%2 == 0) {
+            float distance = (state->at(p1_index)-state->at(j)).abs();
+            normal += 1.0/m_dState.at(j/2) * calculateKernalLaplacian(distance, smoothing_width);
+        }
+    }
+    return normal;
+}
+
+
 // for a given state, evaluate f(X,t)
 vector<Vector3f> FluidSystem::evalF(vector<Vector3f> state)
 {
@@ -121,7 +169,6 @@ vector<Vector3f> FluidSystem::evalF(vector<Vector3f> state)
     
     for (int i = 0; i < state.size(); i++) {
         if (i%2 == 0) {
-            
             if (state.at(i).y() < -2.0f) {
                 f.at(i).y() = 0;
                 f.at(i+1).y() = 0;

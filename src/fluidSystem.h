@@ -18,6 +18,9 @@ public:
     
     float calcMassDensity(Vector3f p1_pos, vector<Vector3f>* state);
     float calculatePressureGradient(float p1_md, float p2_md, Vector3f pos1, Vector3f pos2); 
+    float calcColorfield(int p1_index, vector<Vector3f>* state);
+    float calcNormal(int p1_index, vector<Vector3f>* state);
+
 
 	void draw();
 	void setMD(const vector<float>  & newState) { m_dState = newState; };
@@ -30,17 +33,17 @@ public:
     static constexpr float spring_k = 20;
 
     //change smoothing width as necessary, the larger the more accurate
-    static constexpr float smoothing_width = 50.0f;
+    static constexpr float smoothing_width = 5.0f;
 
     // rest_density = starting density of particles, depends on material properties
     static constexpr float rest_density = 1.0f;
    
-
-protected:
     vector<float> m_dState;
 
+protected:
+
     // rest density corresponds to starting density of particles, depends on material properties
-    static constexpr float rest_density = 1.0f;
+    //static constexpr float rest_density = 1.0f;
 
     static constexpr float buoyancy = 0.5f;
 
