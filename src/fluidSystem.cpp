@@ -25,7 +25,7 @@ FluidSystem::FluidSystem(int numParticles): ParticleSystem(numParticles)
 //using guassian kernel
 //h = smoothing width
 //r = distance between two particles
-float get_kernel(float r, float h) {
+float calculate_kernel(float r, float h) {
 
 	float base = 315.0f/ (64*PI*pow(h,9));
 	float smoothing;
@@ -48,8 +48,22 @@ vector<Vector3f> FluidSystem::evalF(vector<Vector3f> state)
 	vector<Vector3f> f;
 	float mass_density = 0;
 
+
     for (int i = 0; i < state.size(); i++) {
         if (i%2 == 0) {
+
+            Vector3f p1_pos = state.at(i);
+	        //loop through all neighboring particles to get mass_density
+            for (int j = 0; j < state.size(); j++) {
+                if (j%2 == 0) {
+                    Vector3f p2_pos = state.at(j);
+                    float distance = (p1_pos - p2_pos).abs();
+                    //mass density of particle j on particle i
+                    float md_i = mass * calculate_kernel(distance, smoothing_width);
+                    mass_density += md_i;
+                }
+            }
+
             Vector3f gravity_f = Vector3f(0,mass*g,0);
             Vector3f accel = (gravity_f)/mass;
 
