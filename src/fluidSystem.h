@@ -33,7 +33,10 @@ public:
     static constexpr float smoothing_width = 50.0f;
 
     // rest_density = starting density of particles, depends on material properties
-    static constexpr float rest_density = 1.0f;
+    // units kg/m^3
+    static constexpr float rest_density = 1000.0f;
+
+    
    
 
 protected:
