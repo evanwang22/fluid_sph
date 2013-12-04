@@ -1,3 +1,4 @@
+#include <iostream>
 #include "fluidSystem.h"
 #include <math.h>
 
@@ -24,9 +25,9 @@ FluidSystem::FluidSystem(int numParticles): ParticleSystem(numParticles)
 //using guassian kernel
 //h = smoothing width
 //r = distance between two particles
-float get_kernal(float r, float h) {
+float get_kernel(float r, float h) {
 
-	float base = 315.0f/ (64*PI*pow(h,9);
+	float base = 315.0f/ (64*PI*pow(h,9));
 	float smoothing;
 	if ( 0.0f <= abs(r) <= h) {
 		smoothing = pow( (h*h)-(r*r), 3);
@@ -50,7 +51,6 @@ vector<Vector3f> FluidSystem::evalF(vector<Vector3f> state)
     for (int i = 0; i < state.size(); i++) {
         if (i%2 == 0) {
             Vector3f gravity_f = Vector3f(0,mass*g,0);
-
             Vector3f accel = (gravity_f)/mass;
 
             f.push_back(state.at(i+1));
