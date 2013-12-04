@@ -16,6 +16,8 @@ public:
     
     Vector3f checkBounds(Vector3f position);
     
+    float calcMassDensity(Vector3f p1_pos, vector<Vector3f>* state);
+
 	void draw();
 
 	
@@ -25,6 +27,9 @@ public:
     static constexpr float drag_k = 0.5;
     // spring constant
     static constexpr float spring_k = 20;
+
+protected:
+    vector<float> m_dState;
 };
 
 #endif
