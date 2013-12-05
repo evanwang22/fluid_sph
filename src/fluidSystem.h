@@ -33,7 +33,7 @@ public:
     static constexpr float spring_k = 20;
 
     //change smoothing width as necessary, the larger the more accurate
-    static constexpr float smoothing_width = 6.0f;
+    static constexpr float smoothing_width = 5.0f;
 
     vector<float> m_dState;
 

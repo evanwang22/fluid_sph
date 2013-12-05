@@ -12,12 +12,14 @@ FluidSystem::FluidSystem(int numParticles): ParticleSystem(numParticles)
 
     // initialize all these particles together somehow ??
     
-    for (int i = 0; i < 25; i++) {
-	    for (int j = 0; j < 25; j++) {	
+    for (int i = 0; i < 10; i++) {
+	    for (int j = 0; j < 10; j++) {	
+		for (int k=0; k< 3; k++) {
 		// for this system, we care about the position and the velocity
-            m_vVecState.push_back(Vector3f(0.125*j,0,0.125*i));
+            m_vVecState.push_back(Vector3f(0.05*j,0.05*k,0.05*i));
             m_vVecState.push_back(Vector3f(0,0,0));
-        }
+        }	
+	}
 	}
 }
 // using gaussian kernel
@@ -220,11 +222,11 @@ vector<Vector3f> FluidSystem::evalF(vector<Vector3f> state)
                 f.at(i).y() = 0;
                 f.at(i+1).y() = 0;
             }
-            if (state.at(i).x() < -1.0f || state.at(i).x() > 3.0f) {
+            if (state.at(i).x() < -1.0f || state.at(i).x() > 1.0f) {
                 f.at(i).x() = 0;
                 f.at(i+1).x() = 0;
             }
-            if (state.at(i).z() < -1.0f || state.at(i).z() > 3.0f) {
+            if (state.at(i).z() < -1.0f || state.at(i).z() > 1.0f) {
                 f.at(i).z() = 0;
                 f.at(i+1).z() = 0;
             }
@@ -241,14 +243,14 @@ Vector3f FluidSystem::checkBounds(Vector3f position) {
     if (position.x() < -1.0f) {
         position.x() = -1.0f;
     }
-    if (position.x() > 3.0f) {
-        position.x() = 3.0f;
+    if (position.x() > 1.0f) {
+        position.x() = 1.0f;
     }
     if (position.z() < -1.0f) {
         position.z() = -1.0f;
     }
-    if (position.z() > 3.0f) {
-        position.z() = 3.0f;
+    if (position.z() > 1.0f) {
+        position.z() = 1.0f;
     }
 
     return position;
@@ -258,6 +260,7 @@ Vector3f FluidSystem::checkBounds(Vector3f position) {
 void FluidSystem::draw()
 {
 	for (int i = 0; i < m_numParticles; i++) {
+        cout << i << endl;
         m_vVecState.at(i*2) = checkBounds(m_vVecState.at(i*2));
         Vector3f pos = m_vVecState.at(i*2);
 		if (particlesOn) {

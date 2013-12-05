@@ -28,7 +28,7 @@ namespace
   {
     // seed the random number generator with the current time
     srand( time( NULL ) );
-    system = new FluidSystem(225);
+    system = new FluidSystem(300);
     timeStepper = new ForwardEuler();
     h = 0.04f;
 
